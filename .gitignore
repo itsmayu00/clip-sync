@@ -1,0 +1,5 @@
+node_modules/
+.env
+*.log
+daemon/config.json
+__pycache__/
