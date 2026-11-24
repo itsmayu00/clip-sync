@@ -508,19 +508,27 @@
       serverIps = data.localIps || [];
 
       networkIpSelect.innerHTML = '';
-      if (serverIps.length === 0) {
-        const opt = document.createElement('option');
-        opt.value = window.location.host;
-        opt.textContent = window.location.host;
-        networkIpSelect.appendChild(opt);
-      } else {
-        serverIps.forEach(net => {
-          const opt = document.createElement('option');
-          opt.value = `${net.ip}:${data.port}`;
-          opt.textContent = `${net.interface} — ${net.ip}:${data.port}`;
-          networkIpSelect.appendChild(opt);
-        });
+      const isCloud = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+
+      // If running on a cloud domain (Render, Railway, etc.), prioritize the public web URL
+      if (isCloud || serverIps.length === 0) {
+        const cloudOpt = document.createElement('option');
+        cloudOpt.value = window.location.host;
+        cloudOpt.textContent = `🌐 Cloud URL (${window.location.host})`;
+        cloudOpt.selected = true;
+        networkIpSelect.appendChild(cloudOpt);
       }
+
+      // Add network interface IPs (for local Wi-Fi use)
+      serverIps.forEach(net => {
+        const opt = document.createElement('option');
+        opt.value = `${net.ip}:${data.port}`;
+        opt.textContent = `${net.interface} — ${net.ip}:${data.port}`;
+        if (!isCloud && networkIpSelect.children.length === 0) {
+          opt.selected = true;
+        }
+        networkIpSelect.appendChild(opt);
+      });
 
       updateQrCode();
     } catch (e) {
